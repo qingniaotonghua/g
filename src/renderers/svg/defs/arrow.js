@@ -9,8 +9,6 @@ class Arrow {
     const id = Util.uniqueId('marker_');
     el.setAttribute('id', id);
     const shape = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    shape.setAttribute('stroke', 'none');
-    shape.setAttribute('fill', attrs.stroke || '#000');
     el.appendChild(shape);
     el.setAttribute('overflow', 'visible');
     el.setAttribute('orient', 'auto-start-reverse');
@@ -18,7 +16,15 @@ class Arrow {
     this.child = shape;
     this.id = id;
     this.cfg = attrs[type === 'marker-start' ? 'startArrow' : 'endArrow'];
-    this.stroke = attrs.stroke || '#000';
+    this.stroke = (this.cfg && this.cfg.stroke) || attrs.stroke || '#000';// 允许箭头设置边框颜色，默认与边同色
+    if (this.cfg && this.cfg.fill) { // 如果用户设置了填充色，需要显示边框，以此来实现空心 mark 效果
+      shape.setAttribute('fill', this.cfg.fill);
+      shape.setAttribute('stroke', this.stroke);
+    } else { // 兼容原来的逻辑，默认是实心，不显示边线
+      shape.setAttribute('fill', this.stroke);
+      shape.setAttribute('stroke', 'none');
+    }
+
     if (this.cfg === true) {
       this._setDefaultPath(type, shape);
     } else {
